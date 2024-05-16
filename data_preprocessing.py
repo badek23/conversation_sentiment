@@ -1,7 +1,12 @@
 import pandas as pd
 from io import StringIO
+import emoji
+import re
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
 
-number_of_messages = 500
+number_of_messages = 4000
 # Function to read the chat data from txt file
 def read_chat_data(uploaded_file):
     stringio = StringIO(uploaded_file.getvalue().decode('utf-8'))
@@ -74,6 +79,27 @@ def split_messages_and_users(chat_dataframe):
     chat_dataframe['message'] = chat_dataframe['message'].str.strip()
     return chat_dataframe
 
+def remove_symbols(text):
+    text = emoji.replace_emoji(text, replace='')
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+    return text
+
+def tokenize(text):
+    return nltk.word_tokenize(text)
+
+def remove_stopwords(tokens):
+    stop_words = set(stopwords.words('english'))
+    extra_stop_words = {'im', 'u', 'get', 'dont', 'thats', 'ill'}
+    return [word for word in tokens if word not in stop_words and word not in extra_stop_words]
+
+# Get tokens from text
+def get_tokens(chat_dataframe):
+    chat_dataframe['tokens'] = chat_dataframe['message'].apply(remove_symbols)
+    chat_dataframe['tokens'] = chat_dataframe['tokens'].str.lower()
+    chat_dataframe['tokens'] = chat_dataframe['tokens'].apply(tokenize)
+    chat_dataframe['tokens'] = chat_dataframe['tokens'].apply(remove_stopwords)
+    return chat_dataframe
+
 # Function to perform analysis on the chat data
 def analyze_chat_data(uploaded_file):
     # Read the uploaded CSV file
@@ -88,6 +114,8 @@ def analyze_chat_data(uploaded_file):
     cleaned_data = feature_dates(cleaned_data)
     # Split messages and users
     cleaned_data = split_messages_and_users(cleaned_data)
+    # Get tokens from text
+    cleaned_data = get_tokens(cleaned_data)
     #drop the columns that are not needed
     cleaned_data = cleaned_data.drop(columns=[0])
 
