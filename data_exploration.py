@@ -10,6 +10,7 @@ def get_emojis(text):
     return emojis
 
 def fav_emoji(chat_dataframe):
+     chat_dataframe = chat_dataframe.copy()
      chat_dataframe['emoji'] = chat_dataframe['message'].apply(get_emojis)
      user_emojis = sum(chat_dataframe['emoji'].tolist(), [])
      user_emojis = pd.Series(user_emojis).value_counts()
