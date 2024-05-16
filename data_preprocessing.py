@@ -4,6 +4,7 @@ import emoji
 import re
 import nltk
 nltk.download('stopwords')
+nltk.download('punkt')
 from nltk.corpus import stopwords
 
 number_of_messages = 4000
