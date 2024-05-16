@@ -2,8 +2,33 @@ import streamlit as st
 from data_preprocessing import analyze_chat_data
 from data_preprocessing import split_messages_into_users
 import data_exploration as de
-import nltk
-nltk.download('stopwords')
+
+def column_content(user_messages, user_name):
+    st.subheader(user_name)
+    st.write(f"Number of messages: {de.number_of_messages(user_messages)}")
+    st.write(f"Favorite emoji: {de.fav_emoji(user_messages)}")
+    st.write(f"Average number of words per message: {de.avr_num_of_words(user_messages):.1f}")
+    st.write(f"Length of longest message: {de.longest_message(user_messages)}")
+    st.write(f"Hour with most messages: {de.hour_with_most_messages(user_messages)}")
+    st.write(f"Day with most messages: {de.day_with_most_messages(user_messages)}")
+    st.write(f"Number of unique words: {de.number_of_unique_words(user_messages)}")
+    st.write(f"Top words: {', '.join(de.top_words(user_messages))}")
+
+def data_analysis(chat_dataframe, user1_messages, user2_messages):
+
+    st.header("Analysis Results")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        column_content(user1_messages, user1_messages['sender'].iloc[0])
+
+    with col2:
+        column_content(user2_messages, user2_messages['sender'].iloc[0])
+
+    st.plotly_chart(de.messages_per_day(chat_dataframe))
+    st.plotly_chart(de.messages_per_hour(chat_dataframe))
+    st.plotly_chart(de.messages_per_day_of_week(chat_dataframe))
+
 
 # Main function to create the Streamlit app
 def main():
@@ -24,49 +49,10 @@ def main():
         texts_dataframe = analyze_chat_data(uploaded_file)
         user1_messages, user2_messages = split_messages_into_users(texts_dataframe)
 
-        # Divide into two columns
-        st.header("Analysis Results")
-        col1, col2 = st.columns(2)
+        tab1, tab2, tab3 = st.tabs(["Data Analysis", "Sentiment Analysis", "Generative AI"])
 
-        # Display the name of each user
-        col1.subheader(f"{user1_messages['sender'].unique()[0]}")
-        col2.subheader(f"{user2_messages['sender'].unique()[0]}")
-
-        # Display the number of messages for each user
-        col1.write(f"Number of messages: {de.number_of_messages(user1_messages)}")
-        col2.write(f"Number of messages: {de.number_of_messages(user2_messages)}")
-
-        # Display the favorite emoji for each user
-        col1.write(f"Favorite emoji: {de.fav_emoji(user1_messages)}")
-        col2.write(f"Favorite emoji: {de.fav_emoji(user2_messages)}")
-
-        # Display the average number of words per message for each user
-        col1.write(f"Average number of words per message: {de.avr_num_of_words(user1_messages):.1f}")
-        col2.write(f"Average number of words per message: {de.avr_num_of_words(user2_messages):.1f}")
-
-        # Display the length of the longest message for each user
-        col1.write(f"Length of longest message: {de.longest_message(user1_messages)}")
-        col2.write(f"Length of longest message: {de.longest_message(user2_messages)}")
-
-        # Display the hour with the most messages for each user
-        col1.write(f"Hour with most messages: {de.hour_with_most_messages(user1_messages)}")
-        col2.write(f"Hour with most messages: {de.hour_with_most_messages(user2_messages)}")
-
-        # Display the day with the most messages for each user
-        col1.write(f"Day with most messages: {de.day_with_most_messages(user1_messages)}")
-        col2.write(f"Day with most messages: {de.day_with_most_messages(user2_messages)}")
-
-        # Display the number of unique words for each user
-        col1.write(f"Number of unique words: {de.number_of_unique_words(user1_messages)}")
-        col2.write(f"Number of unique words: {de.number_of_unique_words(user2_messages)}")
-
-        # Display the top words for each user
-        col1.write(f"Top words: {', '.join(de.top_words(user1_messages))}")
-        col2.write(f"Top words: {', '.join(de.top_words(user2_messages))}")
-
-        st.plotly_chart(de.messages_per_day(texts_dataframe))
-        st.plotly_chart(de.messages_per_hour(texts_dataframe))
-        st.plotly_chart(de.messages_per_day_of_week(texts_dataframe))
+        with tab1:
+            data_analysis(texts_dataframe, user1_messages, user2_messages)
 
 # Run the app
 if __name__ == "__main__":

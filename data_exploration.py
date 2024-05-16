@@ -13,12 +13,21 @@ def fav_emoji(chat_dataframe):
      chat_dataframe['emoji'] = chat_dataframe['message'].apply(get_emojis)
      user_emojis = sum(chat_dataframe['emoji'].tolist(), [])
      user_emojis = pd.Series(user_emojis).value_counts()
-     return f'{user_emojis.idxmax()}'
+     if user_emojis.empty:
+         return 'No emojis found'
+     if user_emojis.idxmax() == '':
+         return 'No emojis found'
+     #if the most used emoji has been used less than 4 times, return 'Uses few emojis'
+     if user_emojis.max() < 2:
+         return 'Uses few emojis'
+     return f'{user_emojis.idxmax()} x {user_emojis.max()}'
 
 def avr_num_of_words(chat_dataframe):
     return chat_dataframe['message'].str.split().apply(len).mean()
 
 def longest_message(chat_dataframe):
+    if chat_dataframe['message'].str.len().max() > 450:
+        return '400+'
     return chat_dataframe['message'].str.len().max()
 
 def hour_with_most_messages(chat_dataframe):
