@@ -2,6 +2,8 @@ import streamlit as st
 from data_preprocessing import analyze_chat_data
 from data_preprocessing import split_messages_into_users
 import data_exploration as de
+import nltk
+nltk.download('stopwords')
 
 # Main function to create the Streamlit app
 def main():
