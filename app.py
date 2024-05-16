@@ -34,10 +34,10 @@ def data_analysis(chat_dataframe, user1_messages, user2_messages):
 def main():
     # Set title and description
     st.title("Chat Analysis App")
-    st.write("Upload your chat CSV file to get insights!")
+    st.write("Export your WhatsApp chat history and analyze it with this app! Choose to not attach media and upload the ZIP file.")
 
     # File uploader widget
-    uploaded_file = st.file_uploader("Upload CSV file", type=["txt"])
+    uploaded_file = st.file_uploader("Upload CSV file", type=["zip"])
 
      # Provide link to WhatsApp documentation
     if uploaded_file is None:

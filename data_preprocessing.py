@@ -1,4 +1,5 @@
 from io import StringIO
+import zipfile
 import pandas as pd
 import datetime
 import emoji
@@ -11,12 +12,15 @@ from nltk.corpus import stopwords
 #number_of_messages = 5000
 # Function to read the chat data from txt file
 def read_chat_data(uploaded_file):
-    stringio = StringIO(uploaded_file.getvalue().decode('utf-8'))
-    data = stringio.read()
-    data = data.split('\n')
-    #data = pd.DataFrame(data).iloc[-number_of_messages:]
-    data = pd.DataFrame(data)
-    return data
+    with zipfile.ZipFile(uploaded_file, 'r') as z:
+        # Read the 'chat.txt' file
+        with z.open('_chat.txt') as file:
+            stringio = StringIO(file.read().decode('utf-8'))
+            data = stringio.read()
+            data = data.split('\n')
+            #data = pd.DataFrame(data).iloc[-number_of_messages:]
+            data = pd.DataFrame(data)
+        return data
 
 # Delete messages that are not relevant to the chat
 def clean_data(chat_dataframe):
