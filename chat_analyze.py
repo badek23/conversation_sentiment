@@ -2,7 +2,7 @@ import pandas as pd
 from io import StringIO
 
 number_of_messages = 500
-# Function to read the chat data
+# Function to read the chat data from txt file
 def read_chat_data(uploaded_file):
     stringio = StringIO(uploaded_file.getvalue().decode('utf-8'))
     data = stringio.read()
@@ -10,6 +10,7 @@ def read_chat_data(uploaded_file):
     data = pd.DataFrame(data).iloc[-number_of_messages:]
     return data
 
+# Delete messages that are not relevant to the chat
 def clean_data(chat_dataframe):
     ltr_mark = '\u200e'
     location_str = f'{ltr_mark}Location'
@@ -27,8 +28,8 @@ def clean_data(chat_dataframe):
 
     return filtered_data.reset_index(drop=True)
 
+# Aggregate messages that span multiple lines
 def multiple_lines_to_single_line(chat_dataframe):
-    # Aggregate messages that span multiple lines
     aggregated_messages = []
     current_message = ""
 
@@ -48,6 +49,7 @@ def multiple_lines_to_single_line(chat_dataframe):
     # Convert the list back to a DataFrame
     return pd.DataFrame(aggregated_messages, columns=[chat_dataframe.columns[0]])
 
+# Truncate messages longer than 500 characters
 def truncate_long_messages(chat_dataframe):
     for i in range(0, len(chat_dataframe)):
         message = chat_dataframe.iloc[i].values[0]
@@ -55,13 +57,21 @@ def truncate_long_messages(chat_dataframe):
             chat_dataframe.iloc[i] = message[:500]
     return chat_dataframe
 
+# Extract the date from the message
 def feature_dates(chat_dataframe):
-    # Extract the date from the message
     chat_dataframe['date'] = chat_dataframe[0].str.extract(r'\[(\d+/\d+/\d+, \d+:\d+:\d+)\]')
     chat_dataframe['date'] = pd.to_datetime(chat_dataframe['date'], format="%m/%d/%y, %H:%M:%S")
     chat_dataframe['day'] = chat_dataframe['date'].dt.date.astype('str')
     chat_dataframe['hour'] = chat_dataframe['date'].dt.hour
     chat_dataframe['day_of_week'] = chat_dataframe['date'].dt.day_name()
+    return chat_dataframe
+
+# Get the text and user of each message
+def split_messages_and_users(chat_dataframe):
+    chat_dataframe['sender'] = chat_dataframe[0].str.extract(r'\[\d+/\d+/\d+, \d+:\d+:\d+\] ([a-zA-z]+):.*')
+    chat_dataframe['message'] = chat_dataframe[0].str.extract(r'\[\d+/\d+/\d+, \d+:\d+:\d+\] [a-zA-z]+:(.*)')
+    chat_dataframe['sender'] = chat_dataframe['sender'].str.strip()
+    chat_dataframe['message'] = chat_dataframe['message'].str.strip()
     return chat_dataframe
 
 # Function to perform analysis on the chat data
@@ -76,4 +86,18 @@ def analyze_chat_data(uploaded_file):
     cleaned_data = truncate_long_messages(cleaned_data)
     # Extract date features
     cleaned_data = feature_dates(cleaned_data)
+    # Split messages and users
+    cleaned_data = split_messages_and_users(cleaned_data)
+    #drop the columns that are not needed
+    cleaned_data = cleaned_data.drop(columns=[0])
+
     return cleaned_data
+
+# Get messages from each unique user
+def split_messages_into_users(chat_dataframe):
+    users = chat_dataframe['sender'].unique()
+    user1 = users[0]
+    user2 = users[1]
+    user1_data = chat_dataframe[chat_dataframe['sender'] == user1]
+    user2_data = chat_dataframe[chat_dataframe['sender'] == user2]
+    return user1_data, user2_data
