@@ -9,7 +9,7 @@ nltk.download('stopwords')
 nltk.download('punkt')
 from nltk.corpus import stopwords
 
-#number_of_messages = 5000
+number_of_messages = 8000
 # Function to read the chat data from txt file
 def read_chat_data(uploaded_file):
     with zipfile.ZipFile(uploaded_file, 'r') as z:
@@ -18,8 +18,8 @@ def read_chat_data(uploaded_file):
             stringio = StringIO(file.read().decode('utf-8'))
             data = stringio.read()
             data = data.split('\n')
-            #data = pd.DataFrame(data).iloc[-number_of_messages:]
-            data = pd.DataFrame(data)
+            data = pd.DataFrame(data).iloc[-number_of_messages:]
+            #data = pd.DataFrame(data)
         return data
 
 # Delete messages that are not relevant to the chat
