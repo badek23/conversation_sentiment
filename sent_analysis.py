@@ -1,4 +1,6 @@
 import pandas as pd
+import streamlit as st
+import time
 
 def get_average_sentiment(chat_dataframe, user):
     user_messages = chat_dataframe[chat_dataframe['sender'] == user]
@@ -48,3 +50,16 @@ def who_is_more_postive(chat_dataframe, user1, user2):
         return f"{user2} is more into the conversation than {user1}."
     else:
         return "Both of you are equally into the conversation."
+    
+def sentiment_analysis(chat_dataframe):
+    st.header("Sentiment Analysis")
+    #button to analyze sentiment
+    st.write("Analyze the sentiment of the chat messages.")
+
+    if st.button("Analyze"):
+        with st.spinner('Looking at the emotions...'):
+            time.sleep(1)
+            st.write("Analysis complete!")
+            st.write(is_user_more_positive(chat_dataframe, chat_dataframe['sender'].unique()[0]))
+            st.write(is_user_more_positive(chat_dataframe, chat_dataframe['sender'].unique()[1]))
+            st.write(who_is_more_postive(chat_dataframe, chat_dataframe['sender'].unique()[0], chat_dataframe['sender'].unique()[1]))

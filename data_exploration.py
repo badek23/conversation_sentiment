@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import emoji
+import streamlit as st
 
 def number_of_messages(chat_dataframe):
     return len(chat_dataframe)
@@ -63,3 +64,29 @@ def top_words(chat_dataframe):
     words = sum(chat_dataframe['tokens'].tolist(), [])
     words = pd.Series(words).value_counts()
     return words.index[:10].tolist()
+
+def column_content(user_messages, user_name):
+    st.subheader(user_name)
+    st.write(f"Number of messages: {number_of_messages(user_messages)}")
+    st.write(f"Favorite emoji: {fav_emoji(user_messages)}")
+    st.write(f"Average number of words per message: {avr_num_of_words(user_messages):.1f}")
+    st.write(f"Length of longest message: {longest_message(user_messages)}")
+    st.write(f"Hour with most messages: {hour_with_most_messages(user_messages)}")
+    st.write(f"Day with most messages: {day_with_most_messages(user_messages)}")
+    st.write(f"Number of unique words: {number_of_unique_words(user_messages)}")
+    st.write(f"Top words: {', '.join(top_words(user_messages))}")
+
+def data_analysis(chat_dataframe, user1_messages, user2_messages):
+
+    st.header("Analysis Results")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        column_content(user1_messages, user1_messages['sender'].iloc[0])
+
+    with col2:
+        column_content(user2_messages, user2_messages['sender'].iloc[0])
+
+    st.plotly_chart(messages_per_day(chat_dataframe))
+    st.plotly_chart(messages_per_hour(chat_dataframe))
+    st.plotly_chart(messages_per_day_of_week(chat_dataframe))

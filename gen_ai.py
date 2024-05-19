@@ -2,13 +2,16 @@ import streamlit as st
 from openai import OpenAI
 import time
 
+client = OpenAI(
+                    api_key='',  # this is also the default, it can be omitted
+                    )
+
 def get_message_history(chat_dataframe, num_messages):
     message_history = ""
     last_100_messages = chat_dataframe.tail(num_messages)
     for index, row in last_100_messages.iterrows():
         message_history += f"{row['sender']}: {row['message']}\n"
     return message_history
-
 
 def syllabus_request(user, sentiment, context):
     messages = [
@@ -23,8 +26,7 @@ def syllabus_request(user, sentiment, context):
             {context}""",
         },
     ]
-    client = OpenAI()
-    response = client.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo", messages=messages, temperature=0.3, max_tokens=2048
     )
     return response.choices[0].message.content
@@ -53,7 +55,7 @@ def generative_ai(chat_dataframe):
     reply_user = st.selectbox("User", chat_dataframe['sender'].unique(), key="ru")
 
     st.write("Select the sentiment of the message:")
-    sentiment = st.selectbox("Sentiment", ["Positive", "Neutral", "Negative"])
+    sentiment = st.selectbox("Sentiment", ["Positive", "Neutral", "Negative", "Flirty", "Angry", "Sarcastic"], key="s")
 
     if st.button("Generate"):
         if not api_key:
