@@ -60,8 +60,6 @@ def main():
     Using the power of Python and our secret love-detection algorithm, **Pythonic Love** analyzes your chat history to uncover hidden sentiments, patterns, and insights that could reveal if there’s more than just friendly banter happening. 
 
     So, grab your chat history, upload it, and let’s see if your conversations are coded in love! 💌💻
-
-    _P.S. If you're not sure how to export your chat history from WhatsApp, don't worry! [Click here](https://faq.whatsapp.com/android/chats/how-to-save-your-chat-history/?lang=en) for a handy guide._
     """)
     st.caption("Note: This app is for educational purposes only and does not store any data.")
 
@@ -70,7 +68,7 @@ def main():
 
      # Provide link to WhatsApp documentation
     if uploaded_file is None:
-        st.markdown("If you're not sure how to export your chat history from WhatsApp, you can refer to the [WhatsApp documentation](https://faq.whatsapp.com/android/chats/how-to-save-your-chat-history/?lang=en) for instructions.")
+        st.markdown("""_P.S. If you're not sure how to export your chat history from WhatsApp, don't worry! [Click here](https://faq.whatsapp.com/android/chats/how-to-save-your-chat-history/?lang=en) for a handy guide._""")
 
     if uploaded_file is not None:
 
