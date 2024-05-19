@@ -7,20 +7,33 @@ import re
 import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
+nltk.download('vader_lexicon')
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.corpus import stopwords
 
 number_of_messages = 8000
 # Function to read the chat data from txt file
+# TODO - Add support for txt file
+# TODO - Add error handling for invalid files
 def read_chat_data(uploaded_file):
-    with zipfile.ZipFile(uploaded_file, 'r') as z:
-        # Read the 'chat.txt' file
-        with z.open('_chat.txt') as file:
-            stringio = StringIO(file.read().decode('utf-8'))
-            data = stringio.read()
-            data = data.split('\n')
-            data = pd.DataFrame(data).iloc[-number_of_messages:]
-            #data = pd.DataFrame(data)
+
+    # Check if the uploaded file is a ZIP file
+    if uploaded_file.name.endswith('.zip'):
+        with zipfile.ZipFile(uploaded_file, 'r') as z:
+            # Read the 'chat.txt' file
+            with z.open('_chat.txt') as file:
+                stringio = StringIO(file.read().decode('utf-8'))
+                data = stringio.read()
+                data = data.split('\n')
+                data = pd.DataFrame(data).iloc[-number_of_messages:]
+                #data = pd.DataFrame(data)
+            return data
+    elif uploaded_file.name.endswith('.txt'):
+        data = uploaded_file.read().decode('utf-8')
+        data = data.split('\n')
+        data = pd.DataFrame(data).iloc[-number_of_messages:]
         return data
+    
 
 # Delete messages that are not relevant to the chat
 def clean_data(chat_dataframe):
@@ -140,6 +153,75 @@ def get_tokens(chat_dataframe):
     chat_dataframe['tokens'] = chat_dataframe['tokens'].apply(remove_stopwords)
     return chat_dataframe
 
+# Function to check for custom criteria
+def check_custom_criteria(message):
+    bonus = 0.0
+    laughing_emojis = ['😂','🤣','😆']
+    sexy_emojis = ['😏','😍','😘','😚','😙','😗','😋','😛','😜','😝','😎','😈','👅','👄']
+    
+    # Check for words ending with repeating letters (more than 2) (e.g., "Heyyy", "gooo")
+    if re.search(r'\b\w*(\w)\1{2,}\b', message):
+        bonus += 0.5  # Adjust the bonus value as needed
+
+    # Check for more than one exclamation marks in a row
+    if re.search(r'!{2,}', message):
+        bonus += 0.3  # Adjust the bonus value as needed
+
+    # Check for specific emoji (e.g., laughing emoji)
+    laughing_emoji_count = sum(1 for emoji in laughing_emojis if emoji in message)
+    bonus += 0.2 * laughing_emoji_count  # Increase bonus by 0.1 for each laughing emoji
+
+    sexy_emoji_count = sum(1 for emoji in sexy_emojis if emoji in message)
+    bonus += 0.5 * laughing_emoji_count  # Increase bonus by 0.1 for each laughing emoji
+    
+    # Check for "heyy" with increasing bonus for more "y"s
+    heyy_match = re.search(r'\bhey+y\b', message, re.IGNORECASE) or \
+                re.search(r'\bhola+a\b', message, re.IGNORECASE) or \
+                re.search(r'\bhi+i\b', message, re.IGNORECASE) or \
+                re.search(r'\bhello+o\b', message, re.IGNORECASE)
+    if heyy_match:
+        # Number of "y"s minus one, as the base "hey" is not included in the bonus calculation
+        num_ys = len(heyy_match.group()) - 3
+        bonus += 0.2 * num_ys  # Increase bonus by 0.1 for each additional "y"
+
+    #check for "jajaja" with increasing bonus for more "ja"s
+    laugh_match = re.search(r'\b[jakhis]+[jakhis]\b', message, re.IGNORECASE)
+    if laugh_match:
+        # Number of "ja"s minus one, as the base "ja" is not included in the bonus calculation
+        num_jas = len(laugh_match.group()) - 3
+        bonus += 0.2 * num_jas
+    
+    #check for "JAJA" with increasing bonus for more "JA"s
+    allcaps_laugh_match = re.search(r'\b[JAKHS]+[JAKHS]\b', message)
+    if allcaps_laugh_match:
+        # Number of "JA"s minus one, as the base "JA" is not included in the bonus calculation
+        num_JAs = len(allcaps_laugh_match.group()) - 3
+        bonus += 0.5 * num_JAs
+    
+    return bonus
+
+def sentiment_analysis(chat_dataframe):
+    # Initialize the sentiment analyzer
+    sid = SentimentIntensityAnalyzer()
+
+    # Calculate the sentiment scores for each message
+    def custom_sentiment_scores(message):
+        scores = sid.polarity_scores(message)
+        bonus = check_custom_criteria(message)
+        # Adjust the compound score with the bonus
+        scores['compound'] = min(2.0, max(0, scores['compound'] + bonus))  # Ensure the compound score is within [-1.0, 1.0], plus some extra points
+        return scores
+
+    # Calculate the sentiment scores for each message
+    chat_dataframe['sent_scores'] = chat_dataframe['message'].apply(custom_sentiment_scores)
+    chat_dataframe['compound'] = chat_dataframe['sent_scores'].apply(lambda x: x['compound'])
+    chat_dataframe['neg'] = chat_dataframe['sent_scores'].apply(lambda x: x['neg'])
+    chat_dataframe['neu'] = chat_dataframe['sent_scores'].apply(lambda x: x['neu'])
+    chat_dataframe['pos'] = chat_dataframe['sent_scores'].apply(lambda x: x['pos'])
+    chat_dataframe['sentiment'] = chat_dataframe['compound'].apply(lambda x: 'positive' if x >= 0.05 else ('negative' if x <= -0.05 else 'neutral'))
+
+    return chat_dataframe
+
 # Function to perform analysis on the chat data
 def analyze_chat_data(uploaded_file):
     # Read the uploaded CSV file
@@ -156,6 +238,8 @@ def analyze_chat_data(uploaded_file):
     cleaned_data = split_messages_and_users(cleaned_data)
     # Get tokens from text
     cleaned_data = get_tokens(cleaned_data)
+    # Perform sentiment analysis
+    cleaned_data = sentiment_analysis(cleaned_data)
     #drop the columns that are not needed
     cleaned_data = cleaned_data.drop(columns=[0])
 

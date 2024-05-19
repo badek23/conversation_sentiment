@@ -2,7 +2,11 @@ import streamlit as st
 from data_preprocessing import analyze_chat_data
 from data_preprocessing import split_messages_into_users
 import data_exploration as de
+import sent_analysis as sa
 import time
+import gen_ai as ga
+
+st.set_page_config(page_title="Pythonic Love", page_icon="💬")
 
 def column_content(user_messages, user_name):
     st.subheader(user_name)
@@ -35,41 +39,24 @@ def sentiment_analysis(chat_dataframe):
     #button to analyze sentiment
     st.write("Analyze the sentiment of the chat messages.")
 
-    st.write("Select the user to analyze:")
-    sent_user = st.selectbox("User", chat_dataframe['sender'].unique(), key="su")
-
-    st.write("Select the type of sentiment analysis:")
-    analysis_type = st.selectbox("Analysis type", ["Sentiment", "Emotion"])
-
     if st.button("Analyze"):
         with st.spinner('Looking at the emotions...'):
             time.sleep(1)
-            st.write("Coming soon!")
-
-def generative_ai(chat_dataframe):
-    st.header("Generative AI")
-    st.write("Generate your next message using AI.")
-
-    st.write("Select the user to generate a message for:")
-    reply_user = st.selectbox("User", chat_dataframe['sender'].unique(), key="ru")
-
-    st.write("Select the sentiment of the message:")
-    sentiment = st.selectbox("Sentiment", ["Positive", "Neutral", "Negative"])
-
-    if st.button("Generate"):
-        with st.spinner('Generating message...'):
-            time.sleep(1)
-            st.write("Coming soon!")
+            st.write("Analysis complete!")
+            st.write(sa.is_user_more_positive(chat_dataframe, chat_dataframe['sender'].unique()[0]))
+            st.write(sa.is_user_more_positive(chat_dataframe, chat_dataframe['sender'].unique()[1]))
+            st.write(sa.who_is_more_postive(chat_dataframe, chat_dataframe['sender'].unique()[0], chat_dataframe['sender'].unique()[1]))
 
 
 # Main function to create the Streamlit app
 def main():
     # Set title and description
-    st.title("Chat Analysis App")
+    st.title("Pythonic Love")
     st.write("Export your WhatsApp chat history and analyze it with this app! Choose to not attach media and upload the ZIP file.")
+    st.caption("Note: This app is for educational purposes only and does not store any data.")
 
     # File uploader widget
-    uploaded_file = st.file_uploader("Upload ZIP file", type=["zip"])
+    uploaded_file = st.file_uploader("Upload ZIP or TXT file", type=["zip", "txt"])
 
      # Provide link to WhatsApp documentation
     if uploaded_file is None:
@@ -81,7 +68,7 @@ def main():
         texts_dataframe = analyze_chat_data(uploaded_file)
         user1_messages, user2_messages = split_messages_into_users(texts_dataframe)
 
-        tab1, tab2, tab3 = st.tabs(["Who writes the most?", "Who is angrier?", "What should I write next?"])
+        tab1, tab2, tab3 = st.tabs(["Who writes the most?", "Is he/she into you?", "What should I write next?"])
 
         with tab1:
             data_analysis(texts_dataframe, user1_messages, user2_messages)
@@ -90,7 +77,7 @@ def main():
             sentiment_analysis(texts_dataframe)
 
         with tab3:
-            generative_ai(texts_dataframe)
+            ga.generative_ai(texts_dataframe)
 
 # Run the app
 if __name__ == "__main__":
