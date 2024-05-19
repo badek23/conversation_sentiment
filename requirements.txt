@@ -1,3 +1,4 @@
 emoji==2.11.1
 nltk==3.8.1
 plotly==5.20.0
+openai==1.13.3
