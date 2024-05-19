@@ -51,8 +51,18 @@ def sentiment_analysis(chat_dataframe):
 # Main function to create the Streamlit app
 def main():
     # Set title and description
-    st.title("Pythonic Love")
-    st.write("Export your WhatsApp chat history and analyze it with this app! Choose to not attach media and upload the ZIP file.")
+    st.title("Pythonic Love  💖🐍")
+    st.write("""
+    Welcome to **Pythonic Love** – the ultimate app where romance meets code! 🥰✨
+    
+    Are you curious if there's a spark flying in your WhatsApp conversations? Or maybe you just want to see who sends the most emojis? Whatever your reason, you've come to the right place!
+    
+    Using the power of Python and our secret love-detection algorithm, **Pythonic Love** analyzes your chat history to uncover hidden sentiments, patterns, and insights that could reveal if there’s more than just friendly banter happening. 
+
+    So, grab your chat history, upload it, and let’s see if your conversations are coded in love! 💌💻
+
+    _P.S. If you're not sure how to export your chat history from WhatsApp, don't worry! [Click here](https://faq.whatsapp.com/android/chats/how-to-save-your-chat-history/?lang=en) for a handy guide._
+    """)
     st.caption("Note: This app is for educational purposes only and does not store any data.")
 
     # File uploader widget
