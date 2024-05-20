@@ -1,3 +1,4 @@
 data/
 whatsanalyze.com screenshot.png
 __pycache__/
+.env

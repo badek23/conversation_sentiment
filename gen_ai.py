@@ -37,10 +37,8 @@ def generative_ai(chat_dataframe):
 
     with st.expander("OpenAI API Configuration"):
         st.write("To use this feature, configure your OpenAI API settings below.")
-        st.write(
-            "Don't have an API key? Visit [OpenAI](https://beta.openai.com/signup/) to get one."
-        )
         api_key = st.text_input("Enter your OpenAI API key")
+        st.markdown("""_Don't have an API key? Visit [OpenAI](https://beta.openai.com/signup/) to get one._""")
         # Validation check for API key
         if st.button("Submit"):
             if not api_key:
