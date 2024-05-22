@@ -4,18 +4,18 @@ import data_exploration as de
 import sent_analysis as sa
 import gen_ai as ga
 
-st.set_page_config(page_title="Pythonic Love", page_icon="💬")
+st.set_page_config(page_title="Chat Chemistry", page_icon="💬")
 
 # Main function to create the Streamlit app
 def main():
     # Set title and description
-    st.title("Pythonic Love  💖🐍")
+    st.title("Chat Chemistry 💬🐍")
     st.write("""
-    Welcome to **Pythonic Love** – the ultimate app where romance meets code! 🥰✨
+    Welcome to **Chat Chemistry** – the ultimate app where romance meets code! 🥰✨
     
     Are you curious if there's a spark flying in your WhatsApp conversations? Or maybe you just want to see who sends the most emojis? Whatever your reason, you've come to the right place!
     
-    Using the power of Python and our secret love-detection algorithm, **Pythonic Love** analyzes your chat history to uncover hidden sentiments, patterns, and insights that could reveal if there’s more than just friendly banter happening. 
+    Using the power of Python and our secret love-detection algorithm, **Chat Chemistry** analyzes your chat history to uncover hidden sentiments, patterns, and insights that could reveal if there’s more than just friendly banter happening. 
 
     So, grab your chat history, upload it, and let’s see if your conversations are coded in love! 💌💻
     """)

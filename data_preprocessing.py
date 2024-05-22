@@ -157,22 +157,22 @@ def get_tokens(chat_dataframe):
 def check_custom_criteria(message):
     bonus = 0.0
     laughing_emojis = ['😂','🤣','😆']
-    sexy_emojis = ['😏','😍','😘','😚','😙','😗','😋','😛','😜','😝','😎','😈','👅','👄']
+    sexy_emojis = ['😏','😍','😘','😚','😙','😗','😋','😛','😜','😝','😎','😈','👅','👄', '😉']
     
     # Check for words ending with repeating letters (more than 2) (e.g., "Heyyy", "gooo")
     if re.search(r'\b\w*(\w)\1{2,}\b', message):
-        bonus += 0.5  # Adjust the bonus value as needed
+        bonus += 0.5
 
     # Check for more than one exclamation marks in a row
     if re.search(r'!{2,}', message):
-        bonus += 0.3  # Adjust the bonus value as needed
+        bonus += 0.3
 
     # Check for specific emoji (e.g., laughing emoji)
     laughing_emoji_count = sum(1 for emoji in laughing_emojis if emoji in message)
     bonus += 0.2 * laughing_emoji_count  # Increase bonus by 0.1 for each laughing emoji
 
     sexy_emoji_count = sum(1 for emoji in sexy_emojis if emoji in message)
-    bonus += 0.5 * laughing_emoji_count  # Increase bonus by 0.1 for each laughing emoji
+    bonus += 2 * laughing_emoji_count  # Increase bonus by 0.1 for each laughing emoji
     
     # Check for "heyy" with increasing bonus for more "y"s
     heyy_match = re.search(r'\bhey+y\b', message, re.IGNORECASE) or \
@@ -189,14 +189,14 @@ def check_custom_criteria(message):
     if laugh_match:
         # Number of "ja"s minus one, as the base "ja" is not included in the bonus calculation
         num_jas = len(laugh_match.group()) - 3
-        bonus += 0.2 * num_jas
+        bonus += 0.5 * num_jas
     
     #check for "JAJA" with increasing bonus for more "JA"s
     allcaps_laugh_match = re.search(r'\b[JAKHS]+[JAKHS]\b', message)
     if allcaps_laugh_match:
         # Number of "JA"s minus one, as the base "JA" is not included in the bonus calculation
         num_JAs = len(allcaps_laugh_match.group()) - 3
-        bonus += 0.5 * num_JAs
+        bonus += 1 * num_JAs
     
     return bonus
 
@@ -209,7 +209,7 @@ def sentiment_analysis(chat_dataframe):
         scores = sid.polarity_scores(message)
         bonus = check_custom_criteria(message)
         # Adjust the compound score with the bonus
-        scores['compound'] = min(2.0, max(0, scores['compound'] + bonus))  # Ensure the compound score is within [-1.0, 1.0], plus some extra points
+        scores['compound'] = max(0, scores['compound'] + bonus)  # Ensure the compound score is within [-1.0, 1.0], plus some extra points
         return scores
 
     # Calculate the sentiment scores for each message

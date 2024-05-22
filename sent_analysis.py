@@ -44,9 +44,9 @@ def is_user_more_positive(chat_dataframe, user):
 
 def who_is_more_postive(chat_dataframe, user1, user2):
     sentiment_diff = sentiment_difference(chat_dataframe, user1, user2)
-    if sentiment_diff > 0.2:
+    if sentiment_diff > 0.05:
         return f"{user1} is more into the conversation than {user2}."
-    elif sentiment_diff < -0.2:
+    elif sentiment_diff < -0.05:
         return f"{user2} is more into the conversation than {user1}."
     else:
         return "Both of you are equally into the conversation."
